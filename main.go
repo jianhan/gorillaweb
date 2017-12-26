@@ -1,20 +1,13 @@
 package main
 
 import (
-	"net/http"
-	"os"
-
-	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
+	"github.com/davecgh/go-spew/spew"
 	_ "github.com/jianhan/gorillaweb/bootstrap"
+	"github.com/jianhan/gorillaweb/server"
+	"github.com/spf13/viper"
 )
 
 func main() {
-	r := mux.NewRouter()
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("This is a catch-all route"))
-	})
-
-	loggedRouter := handlers.LoggingHandler(os.Stdout, r)
-	http.ListenAndServe(":8888", loggedRouter)
+	spew.Dump(viper.Get("appName"))
+	server.Run()
 }

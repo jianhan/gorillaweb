@@ -13,6 +13,13 @@ func init() {
 }
 
 func initializeConfigs() error {
+	// set default values
+	viper.SetDefault("appName", "Go App")
+	viper.SetDefault("server.host", "localhost")
+	viper.SetDefault("server.port", 8888)
+	viper.SetDefault("server.writeTimeout", 15)
+	viper.SetDefault("server.readTimeout", 15)
+	// start initialize loading
 	viper.SetConfigName("app")
 	viper.AddConfigPath("configs")
 	viper.SetConfigType("yaml")
