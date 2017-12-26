@@ -1,6 +1,9 @@
-appName: Test App
+appName: Test App134
 server:
   host: localhost
   port: 8888
   writeTimeout: 15
   readTimeout: 15
+  readHeaderTimeout: 15
+environment: development
+enableLog: true
