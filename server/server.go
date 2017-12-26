@@ -13,10 +13,11 @@ import (
 )
 
 func Run() {
-	r := mux.NewRouter()
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("This is a catch-all route"))
-	})
+	r, err := AttachRouter(mux.NewRouter())
+	if err != nil {
+		// TODO: handler error here
+	}
+
 	srv := &http.Server{
 		Handler:           r,
 		Addr:              fmt.Sprintf("%s:%d", viper.Get("server.host"), viper.Get("server.port")),
