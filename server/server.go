@@ -13,10 +13,7 @@ import (
 )
 
 func Run() {
-	r, err := AttachRouter(mux.NewRouter())
-	if err != nil {
-		// TODO: handler error here
-	}
+	r := AttachRouter(mux.NewRouter())
 
 	srv := &http.Server{
 		Handler:           r,

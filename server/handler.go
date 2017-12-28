@@ -6,9 +6,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func AttachRouter(h *mux.Router) (*mux.Router, error) {
+func AttachRouter(h *mux.Router) *mux.Router {
 	h.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("This is a catch-all route"))
 	}).Name("home")
-	return h, nil
+	return h
 }
