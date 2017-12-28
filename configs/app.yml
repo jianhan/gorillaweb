@@ -7,3 +7,8 @@ server:
   readHeaderTimeout: 15
 environment: development
 enableLog: true
+auth0:
+  domain: goauth.au.auth0.com
+  client_id: 09RV76qlqN1T4B5IRfb7Yq8Rn11vVpaP
+  client_secret: yF2eubWsFopc3YvADdDiSofh1iklTQwOgWGDGFssMDA3wDjf3rO9dnlTDkjsrHh_
+  audience: http://localhost:8888
