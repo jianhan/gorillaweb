@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -26,6 +27,20 @@ func newHTTPError(code uint, message string) *httpError {
 
 func (h *httpError) Error() string {
 	return fmt.Sprintf("[%d] %s", h.Code, h.Message)
+}
+
+func sendJSONResponse(w http.ResponseWriter, statusCode int, data interface{}) {
+	body, err := json.Marshal(data)
+	if err != nil {
+		log.Printf("Failed to encode a JSON response: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(statusCode)
+	if _, err = w.Write(body); err != nil {
+		log.Printf("Failed to write the response body: %v", err)
+	}
 }
 
 func Run() {
