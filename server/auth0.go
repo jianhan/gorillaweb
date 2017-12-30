@@ -1,33 +1,83 @@
 package server
 
 import (
+	"errors"
 	"net/http"
+	"strings"
+
+	auth0 "github.com/auth0-community/go-auth0"
+	jose "gopkg.in/square/go-jose.v2"
+	"gopkg.in/square/go-jose.v2/jwt"
 )
 
-type Response struct {
-	Message string `json:"message"`
+type jwtRequestValidatorScopeChecker interface {
+	validateRequest(r *http.Request) error
+	checkScope(r *http.Request) error
 }
 
-func checkJWTHandler(
-	handler func(w http.ResponseWriter, r *http.Request),
-	jwtValidator jwtRequestValidatorScopeChecker,
-) func(w http.ResponseWriter, r *http.Request) {
-	h := func(w http.ResponseWriter, r *http.Request) {
-		err := jwtValidator.validateRequest(r)
-		if err != nil {
-			sendJSONResponse(w, http.StatusUnauthorized, newHTTPError(http.StatusUnauthorized, err.Error()))
-			return
-		} else {
-			err := jwtValidator.checkScope(r)
-			if err != nil {
-				sendJSONResponse(w, http.StatusUnauthorized, newHTTPError(http.StatusUnauthorized, err.Error()))
-				return
-			} else {
-				handler(w, r)
-			}
-		}
+type auth0ValidatorScopeChecker struct {
+	domain       string
+	clientID     string
+	clientSecret string
+	jwtValidator *auth0.JWTValidator
+	token        *jwt.JSONWebToken
+}
 
+func newJWTRequestValidatorScopeChecker(domain, clientID, clientSecret string, audiences []string) *auth0ValidatorScopeChecker {
+	// start validation for constructor
+	if strings.TrimSpace(domain) == "" {
+		panic("Domain can not be empty")
 	}
-	return h
+	if strings.TrimSpace(clientID) == "" {
+		panic("Client ID can not be empty")
+	}
+	if strings.TrimSpace(clientSecret) == "" {
+		panic("Client secret can not be empty")
+	}
+	if len(audiences) == 0 {
+		panic("Audiences can not be empty")
+	}
+	// start build struct
+	jwksURI := "https://" + domain + "/.well-known/jwks.json"
+	client := auth0.NewJWKClient(auth0.JWKClientOptions{URI: jwksURI})
+	apiIssuer := "https://" + domain + "/"
+	configuration := auth0.NewConfiguration(client, audiences, apiIssuer, jose.RS256)
+	validator := auth0.NewValidator(configuration)
+	return &auth0ValidatorScopeChecker{
+		domain:       domain,
+		clientID:     clientID,
+		clientSecret: clientSecret,
+		jwtValidator: validator,
+	}
+}
 
+func (a *auth0ValidatorScopeChecker) validateRequest(r *http.Request) error {
+	token, err := a.jwtValidator.ValidateRequest(r)
+	if err != nil {
+		return err
+	}
+	a.token = token
+	return nil
+}
+
+func (a *auth0ValidatorScopeChecker) checkScope(r *http.Request) error {
+	claims := map[string]interface{}{}
+	if a.jwtValidator == nil {
+		return errors.New("jwtValidator is nil")
+	}
+	if a.token == nil {
+		return errors.New("token is nil, please validate request first, then check scope")
+	}
+	err := a.jwtValidator.Claims(r, a.token, &claims)
+	if err != nil {
+		return err
+	}
+	// TODO: scope not setup just yet
+	// if claims["scope"] != nil && strings.Contains(claims["scope"].(string), "read:messages") {
+	// 	return nil
+	// }
+	if claims["scope"] != nil {
+		return nil
+	}
+	return errors.New("Invalid scope")
 }
