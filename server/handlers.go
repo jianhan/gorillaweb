@@ -2,10 +2,11 @@ package server
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
-
-	"github.com/spf13/viper"
+	"path/filepath"
+	"sync"
 
 	"github.com/gorilla/mux"
 )
@@ -52,17 +53,38 @@ func index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Hello:", name)
 }
 
+// templ represents a single template
+type templateHandler struct {
+	once     sync.Once
+	filename string
+	templ    *template.Template
+}
+
+// ServeHTTP handles the HTTP request.
+func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	t.once.Do(func() {
+		t.templ = template.Must(template.ParseFiles(filepath.Join("templates", t.filename)))
+	})
+	t.templ.Execute(w, nil)
+}
+
 func AttachRouter(h *mux.Router) *mux.Router {
-	jwtValidator := newJWTRequestValidatorScopeChecker(
-		viper.GetString("auth0.domain"),
-		viper.GetString("auth0.client_id"),
-		viper.GetString("auth0.client_secret"),
-		[]string{viper.GetString("auth0.audience")},
-	)
-	h.HandleFunc("/api/private", checkJWTHandler(examplePrivateHandler, jwtValidator))
-	h.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("This is a catch-all route"))
-	}).Name("home")
-	h.HandleFunc("/hello/{name}", index).Methods("GET")
+	// jwtValidator := newJWTRequestValidatorScopeChecker(
+	// 	viper.GetString("auth0.domain"),
+	// 	viper.GetString("auth0.client_id"),
+	// 	viper.GetString("auth0.client_secret"),
+	// 	[]string{viper.GetString("auth0.audience")},
+	// )
+	r := newRoom()
+	h.Handle("/room", r)
+	// get the room going
+	go r.run()
+	// h.HandleFunc("/api/private", checkJWTHandler(examplePrivateHandler, jwtValidator))
+
+	h.Handle("/chat", &templateHandler{filename: "chat.html"}).Name("home")
+	// h.HandleFunc("/hello/{name}", index).Methods("GET")
+	// h.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	// 	w.Write([]byte("This is a catch-all route"))
+	// }).Name("home")
 	return h
 }
