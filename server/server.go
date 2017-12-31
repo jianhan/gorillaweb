@@ -13,11 +13,30 @@ import (
 	"github.com/spf13/viper"
 )
 
-func Run() {
+type Options interface {
+	GetPort() int
+}
+
+type ServerOptions struct {
+	Port int
+}
+
+func (s ServerOptions) GetPort() int {
+	if s.Port > 0 {
+		return s.Port
+	}
+	return viper.GetInt("server.port")
+}
+
+func NewServerOptions(port int) ServerOptions {
+	return ServerOptions{Port: port}
+}
+
+func Run(options Options) {
 	r := gHandlers.AttachRouter(mux.NewRouter())
 	srv := &http.Server{
 		Handler:           r,
-		Addr:              fmt.Sprintf("%s:%d", viper.Get("server.host"), viper.Get("server.port")),
+		Addr:              fmt.Sprintf("%s:%d", viper.Get("server.host"), options.GetPort()),
 		WriteTimeout:      time.Duration(viper.GetInt64("server.writeTimeout")) * time.Second,
 		ReadTimeout:       time.Duration(viper.GetInt64("server.readTimeout")) * time.Second,
 		ReadHeaderTimeout: time.Duration(viper.GetInt64("server.readHeaderTimeout")) * time.Second,
