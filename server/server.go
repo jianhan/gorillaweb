@@ -1,7 +1,6 @@
 package server
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,41 +9,12 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	gHandlers "github.com/jianhan/gorillaweb/handlers"
 	"github.com/spf13/viper"
 )
 
-type httpError struct {
-	Code    uint   `json:"code"`
-	Message string `json:"message"`
-}
-
-func newHTTPError(code uint, message string) *httpError {
-	return &httpError{
-		Code:    code,
-		Message: message,
-	}
-}
-
-func (h *httpError) Error() string {
-	return fmt.Sprintf("[%d] %s", h.Code, h.Message)
-}
-
-func sendJSONResponse(w http.ResponseWriter, statusCode int, data interface{}) {
-	body, err := json.Marshal(data)
-	if err != nil {
-		log.Printf("Failed to encode a JSON response: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(statusCode)
-	if _, err = w.Write(body); err != nil {
-		log.Printf("Failed to write the response body: %v", err)
-	}
-}
-
 func Run() {
-	r := AttachRouter(mux.NewRouter())
+	r := gHandlers.AttachRouter(mux.NewRouter())
 	srv := &http.Server{
 		Handler:           r,
 		Addr:              fmt.Sprintf("%s:%d", viper.Get("server.host"), viper.Get("server.port")),

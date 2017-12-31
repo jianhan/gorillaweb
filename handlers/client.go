@@ -1,4 +1,4 @@
-package server
+package handlers
 
 import (
 	"github.com/gorilla/websocket"
