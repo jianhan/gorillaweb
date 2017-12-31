@@ -10,29 +10,11 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	gHandlers "github.com/jianhan/gorillaweb/handlers"
+	"github.com/jianhan/gorillaweb/opts"
 	"github.com/spf13/viper"
 )
 
-type Options interface {
-	GetPort() int
-}
-
-type ServerOptions struct {
-	Port int
-}
-
-func (s ServerOptions) GetPort() int {
-	if s.Port > 0 {
-		return s.Port
-	}
-	return viper.GetInt("server.port")
-}
-
-func NewServerOptions(port int) ServerOptions {
-	return ServerOptions{Port: port}
-}
-
-func Run(options Options) {
+func Run(options opts.Options) {
 	r := gHandlers.AttachRouter(mux.NewRouter())
 	srv := &http.Server{
 		Handler:           r,
