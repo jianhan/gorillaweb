@@ -22,7 +22,7 @@ func sendJSONResponse(w http.ResponseWriter, statusCode int, data interface{}) {
 
 func AttachRouter(h *mux.Router) *mux.Router {
 	r := newRoom()
-	h.Handle("/chat", &templateHandler{filename: "chat.html"}).Name("home")
+	h.Handle("/chat", &templateHandler{filename: "chat.html"}).Name("chat")
 	h.Handle("/room", r)
 	go r.run()
 	return h

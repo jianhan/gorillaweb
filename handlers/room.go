@@ -1,9 +1,12 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/websocket"
+	"github.com/jianhan/gorillaweb/trace"
 )
 
 type room struct {
@@ -16,6 +19,9 @@ type room struct {
 	leave chan *client
 	// clients holds all current clients in this room.
 	clients map[*client]bool
+	// tracer will receive trace information of activity
+	// in the room.
+	tracer trace.Tracer
 }
 
 func (r *room) run() {
@@ -24,14 +30,17 @@ func (r *room) run() {
 		case client := <-r.join:
 			// joining
 			r.clients[client] = true
+			r.tracer.Trace("Client Joined")
 		case client := <-r.leave:
 			// leaving
 			delete(r.clients, client)
 			close(client.send)
+			r.tracer.Trace("Client Left")
 		case msg := <-r.forward:
 			// forward message to all clients
 			for client := range r.clients {
 				client.send <- msg
+				r.tracer.Trace(fmt.Sprintf("Message %s sent to client", msg))
 			}
 		}
 	}
@@ -69,5 +78,6 @@ func newRoom() *room {
 		join:    make(chan *client),
 		leave:   make(chan *client),
 		clients: make(map[*client]bool),
+		tracer:  trace.New(os.Stdout),
 	}
 }
