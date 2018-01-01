@@ -81,3 +81,22 @@ func (a *auth0ValidatorScopeChecker) checkScope(r *http.Request) error {
 	}
 	return errors.New("Invalid scope")
 }
+
+func checkJWTHandler(
+	handler func(w http.ResponseWriter, r *http.Request),
+	jwtValidator jwtRequestValidatorScopeChecker,
+) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := jwtValidator.validateRequest(r)
+		if err != nil {
+			sendJSONResponse(w, http.StatusUnauthorized, newHTTPError(http.StatusUnauthorized, err.Error()))
+			return
+		}
+		err = jwtValidator.checkScope(r)
+		if err != nil {
+			sendJSONResponse(w, http.StatusUnauthorized, newHTTPError(http.StatusUnauthorized, err.Error()))
+			return
+		}
+		handler(w, r)
+	}
+}
