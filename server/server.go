@@ -26,5 +26,7 @@ func Run(options opts.Options) {
 	if viper.GetBool("enableLog") {
 		srv.Handler = handlers.LoggingHandler(os.Stdout, r)
 	}
-	log.Fatal(srv.ListenAndServe())
+	if err := srv.ListenAndServe(); err != nil {
+		log.Fatal("ListenAndServe:", err)
+	}
 }
