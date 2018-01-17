@@ -15,7 +15,13 @@ import (
 )
 
 func Run(options opts.Options) {
-	r := gHandlers.AttachRouter(mux.NewRouter())
+	jvs := gHandlers.NewJWTRequestValidatorScopeChecker(
+		viper.GetString("auth0.domain"),
+		viper.GetString("auth0.client_id"),
+		viper.GetString("auth0.client_secret"),
+		[]string{viper.GetString("auth0.audience")},
+	)
+	r := gHandlers.AttachRouter(mux.NewRouter(), jvs)
 	srv := &http.Server{
 		Handler:           r,
 		Addr:              fmt.Sprintf("%s:%d", viper.Get("server.host"), options.GetPort()),

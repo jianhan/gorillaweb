@@ -23,7 +23,7 @@ type auth0ValidatorScopeChecker struct {
 	token        *jwt.JSONWebToken
 }
 
-func newJWTRequestValidatorScopeChecker(domain, clientID, clientSecret string, audiences []string) *auth0ValidatorScopeChecker {
+func NewJWTRequestValidatorScopeChecker(domain, clientID, clientSecret string, audiences []string) *auth0ValidatorScopeChecker {
 	// start validation for constructor
 	if strings.TrimSpace(domain) == "" {
 		panic("Domain can not be empty")
