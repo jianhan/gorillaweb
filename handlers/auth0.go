@@ -41,8 +41,7 @@ func NewJWTRequestValidatorScopeChecker(domain, clientID, clientSecret string, a
 	jwksURI := "https://" + domain + "/.well-known/jwks.json"
 	client := auth0.NewJWKClient(auth0.JWKClientOptions{URI: jwksURI})
 	apiIssuer := "https://" + domain + "/"
-	configuration := auth0.NewConfiguration(client, audiences, apiIssuer, jose.RS256)
-	validator := auth0.NewValidator(configuration)
+	validator := auth0.NewValidator(auth0.NewConfiguration(client, audiences, apiIssuer, jose.RS256))
 	return &auth0ValidatorScopeChecker{
 		domain:       domain,
 		clientID:     clientID,

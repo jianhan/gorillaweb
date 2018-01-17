@@ -9,6 +9,6 @@ environment: development
 enableLog: true
 auth0:
   domain: goauth.au.auth0.com
-  client_id: BVuJjBMXz45TI7FmNHfV2tjooTQtmIDY
-  client_secret: wxwfZFMQ7n0C--vUrKkl8xJJnK3MaYjsnhVhSEOA2YlGH2U-GOal62OJNDEHabGs
+  client_id: WXTjYJ9bHrTEuw51l1FT4nod5GBP5qc8
+  client_secret: owYwrnx4L0IIb0aFk14mXf8p7lonR1bKMXs4JpQ3WrFtMXtD9cg2XBeK444_yx7t
   audience: vuejs
