@@ -14,7 +14,7 @@ import (
 )
 
 func Run(options opts.Options) {
-	n := negroni.Classic() // 导入一些预设的中间件
+	n := negroni.Classic()
 	n.UseHandler(gHandlers.AttachRouter(mux.NewRouter()))
 	srv := &http.Server{
 		Handler:           n,
