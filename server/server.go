@@ -4,33 +4,24 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
-	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	gHandlers "github.com/jianhan/gorillaweb/handlers"
 	"github.com/jianhan/gorillaweb/opts"
 	"github.com/spf13/viper"
+	"github.com/urfave/negroni"
 )
 
 func Run(options opts.Options) {
-	jvs := gHandlers.NewJWTRequestValidatorScopeChecker(
-		viper.GetString("auth0.domain"),
-		viper.GetString("auth0.client_id"),
-		viper.GetString("auth0.client_secret"),
-		[]string{viper.GetString("auth0.audience")},
-	)
-	r := gHandlers.AttachRouter(mux.NewRouter(), jvs)
+	n := negroni.Classic() // 导入一些预设的中间件
+	n.UseHandler(gHandlers.AttachRouter(mux.NewRouter()))
 	srv := &http.Server{
-		Handler:           r,
+		Handler:           n,
 		Addr:              fmt.Sprintf("%s:%d", viper.Get("server.host"), options.GetPort()),
 		WriteTimeout:      time.Duration(viper.GetInt64("server.writeTimeout")) * time.Second,
 		ReadTimeout:       time.Duration(viper.GetInt64("server.readTimeout")) * time.Second,
 		ReadHeaderTimeout: time.Duration(viper.GetInt64("server.readHeaderTimeout")) * time.Second,
-	}
-	if viper.GetBool("enableLog") {
-		srv.Handler = handlers.LoggingHandler(os.Stdout, r)
 	}
 	if err := srv.ListenAndServe(); err != nil {
 		log.Fatal("ListenAndServe:", err)

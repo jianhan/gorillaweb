@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	auth0 "github.com/auth0-community/go-auth0"
+	"github.com/davecgh/go-spew/spew"
+	"github.com/spf13/viper"
 	jose "gopkg.in/square/go-jose.v2"
 	"gopkg.in/square/go-jose.v2/jwt"
 )
@@ -98,4 +100,25 @@ func checkJWTHandler(
 		}
 		handler(w, r)
 	}
+}
+
+func checkJWTMiddleware(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	jvs := NewJWTRequestValidatorScopeChecker(
+		viper.GetString("auth0.domain"),
+		viper.GetString("auth0.client_id"),
+		viper.GetString("auth0.client_secret"),
+		[]string{viper.GetString("auth0.audience")},
+	)
+	spew.Dump("TTTTT")
+	err := jvs.validateRequest(r)
+	if err != nil {
+		sendJSONResponse(rw, http.StatusUnauthorized, newHTTPError(http.StatusUnauthorized, err.Error()))
+		return
+	}
+	err = jvs.checkScope(r)
+	if err != nil {
+		sendJSONResponse(rw, http.StatusUnauthorized, newHTTPError(http.StatusUnauthorized, err.Error()))
+		return
+	}
+	next(rw, r)
 }

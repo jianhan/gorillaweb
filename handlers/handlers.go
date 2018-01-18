@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/urfave/negroni"
 )
 
 func sendJSONResponse(w http.ResponseWriter, statusCode int, data interface{}) {
@@ -25,18 +26,20 @@ func sendJSONResponse(w http.ResponseWriter, statusCode int, data interface{}) {
 func index(w http.ResponseWriter, r *http.Request) {
 	log.Println("Responsing to /hello request")
 	log.Println(r.UserAgent())
-
 	vars := mux.Vars(r)
 	name := vars["name"]
-
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintln(w, "Hello:", name)
 }
-func AttachRouter(h *mux.Router, avs *auth0ValidatorScopeChecker) *mux.Router {
-	r := newRoom()
-	h.Handle("/chat", &templateHandler{filename: "chat.html"}).Name("chat")
-	h.Handle("/room", r)
-	h.HandleFunc("/private/{name}", checkJWTHandler(index, avs)).Methods("GET").Name("private")
-	go r.run()
+
+func AttachRouter(h *mux.Router) *mux.Router {
+	// define all api routes here
+	apiRouter := mux.NewRouter().PathPrefix("/api/v1").Subrouter().StrictSlash(true)
+	apiRouter.HandleFunc("/private", index).Methods("GET")
+	// connect main route with middleware via negroni
+	h.PathPrefix("/api/v1").Handler(negroni.New(
+		negroni.HandlerFunc(checkJWTMiddleware),
+		negroni.Wrap(apiRouter),
+	))
 	return h
 }
