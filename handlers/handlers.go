@@ -2,13 +2,21 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"
 )
+
+type Route struct {
+	Name        string
+	Method      []string
+	Pattern     string
+	HandlerFunc http.HandlerFunc
+}
+
+//Routes defines the list of routes of our API
+type Routes []Route
 
 func sendJSONResponse(w http.ResponseWriter, statusCode int, data interface{}) {
 	body, err := json.Marshal(data)
@@ -23,19 +31,13 @@ func sendJSONResponse(w http.ResponseWriter, statusCode int, data interface{}) {
 	}
 }
 
-func index(w http.ResponseWriter, r *http.Request) {
-	log.Println("Responsing to /hello request")
-	log.Println(r.UserAgent())
-	vars := mux.Vars(r)
-	name := vars["name"]
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, "Hello:", name)
-}
-
 func AttachRouter(h *mux.Router) *mux.Router {
 	// define all api routes here
 	apiRouter := mux.NewRouter().PathPrefix("/api/v1").Subrouter().StrictSlash(true)
-	apiRouter.HandleFunc("/private", index).Methods("GET")
+	for _, route := range apiRoutes {
+		apiRouter.Methods(route.Method...).Path(route.Pattern).Name(route.Name).Handler(route.HandlerFunc)
+	}
+
 	// connect main route with middleware via negroni
 	h.PathPrefix("/api/v1").Handler(negroni.New(
 		negroni.HandlerFunc(checkJWTMiddleware),
