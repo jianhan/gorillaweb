@@ -8,16 +8,6 @@ import (
 	"github.com/urfave/negroni"
 )
 
-type Route struct {
-	Name        string
-	Method      []string
-	Pattern     string
-	HandlerFunc http.HandlerFunc
-}
-
-//Routes defines the list of routes of our API
-type Routes []Route
-
 func sendJSONResponse(w http.ResponseWriter, statusCode int, data interface{}) {
 	body, err := json.Marshal(data)
 	if err != nil {
