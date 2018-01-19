@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
+	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/davecgh/go-spew/spew"
+	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 )
 
 var apiRoutes = Routes{
@@ -17,11 +19,28 @@ var apiRoutes = Routes{
 	},
 }
 
+type comment struct {
+	ID     bson.ObjectId `json:"id" bson:"_id"`
+	Author string        `json:"author" bson:"author"`
+	Text   string        `json:"text" bson:"text"`
+	When   time.Time     `json:"when" bson:"when"`
+}
+
 func private(w http.ResponseWriter, r *http.Request) {
-	log.Println("Responsing to /hello request")
-	log.Println(r.UserAgent())
-	vars := mux.Vars(r)
-	name := vars["name"]
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, "Hello:", name)
+	db := r.Context().Value("database").(*mgo.Session)
+	spew.Dump(db)
+	// // decode the request body
+	// c := comment{Author: "Jian", Text: "Description"}
+	// // give the comment a unique ID
+	// c.ID = bson.NewObjectId()
+	// c.When = time.Now()
+
+	// // insert it into the database
+	// if err := db.DB("commentsapp").C("comments").Insert(&c); err != nil {
+	// 	http.Error(w, err.Error(), http.StatusBadRequest)
+	// 	return
+	// }
+
+	fmt.Fprintln(w, "Hello:")
 }
