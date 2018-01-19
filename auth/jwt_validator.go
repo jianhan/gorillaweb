@@ -1,4 +1,4 @@
-package handlers
+package auth
 
 import (
 	"errors"
@@ -11,8 +11,8 @@ import (
 )
 
 type jwtRequestValidatorScopeChecker interface {
-	validateRequest(r *http.Request) error
-	checkScope(r *http.Request) error
+	ValidateRequest(r *http.Request) error
+	CheckScope(r *http.Request) error
 }
 
 type auth0ValidatorScopeChecker struct {
@@ -50,7 +50,7 @@ func NewJWTRequestValidatorScopeChecker(domain, clientID, clientSecret string, a
 	}
 }
 
-func (a *auth0ValidatorScopeChecker) validateRequest(r *http.Request) error {
+func (a *auth0ValidatorScopeChecker) ValidateRequest(r *http.Request) error {
 	token, err := a.jwtValidator.ValidateRequest(r)
 	if err != nil {
 		return err
@@ -59,7 +59,7 @@ func (a *auth0ValidatorScopeChecker) validateRequest(r *http.Request) error {
 	return nil
 }
 
-func (a *auth0ValidatorScopeChecker) checkScope(r *http.Request) error {
+func (a *auth0ValidatorScopeChecker) CheckScope(r *http.Request) error {
 	claims := map[string]interface{}{}
 	if a.jwtValidator == nil {
 		return errors.New("jwtValidator is nil")

@@ -32,13 +32,10 @@ func sendJSONResponse(w http.ResponseWriter, statusCode int, data interface{}) {
 }
 
 func AttachRouter(h *mux.Router) *mux.Router {
-	// define all api routes here
 	apiRouter := mux.NewRouter().PathPrefix("/api/v1").Subrouter().StrictSlash(true)
 	for _, route := range apiRoutes {
 		apiRouter.Methods(route.Method...).Path(route.Pattern).Name(route.Name).Handler(route.HandlerFunc)
 	}
-
-	// connect main route with middleware via negroni
 	h.PathPrefix("/api/v1").Handler(negroni.New(
 		negroni.HandlerFunc(checkJWTMiddleware),
 		negroni.Wrap(apiRouter),
