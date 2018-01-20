@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/jianhan/gorillaweb/auth"
+	"github.com/jianhan/gorillaweb/src/auth"
 	"github.com/spf13/viper"
 	"github.com/urfave/negroni"
 	mgo "gopkg.in/mgo.v2"
@@ -32,7 +32,6 @@ func checkJWTMiddleware(rw http.ResponseWriter, r *http.Request, next http.Handl
 
 func MongoMiddleware(session *mgo.Session) negroni.HandlerFunc {
 	return negroni.HandlerFunc(func(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-
 		// copy the database session
 		dbsession := session.Copy()
 		defer dbsession.Close() // clean up

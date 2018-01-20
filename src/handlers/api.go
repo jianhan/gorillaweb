@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -29,18 +28,17 @@ type comment struct {
 func private(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	db := r.Context().Value("database").(*mgo.Session)
-	spew.Dump(db)
-	// // decode the request body
-	// c := comment{Author: "Jian", Text: "Description"}
-	// // give the comment a unique ID
-	// c.ID = bson.NewObjectId()
-	// c.When = time.Now()
+	// decode the request body
+	c := comment{Author: "Jian", Text: "Description"}
+	// give the comment a unique ID
+	c.ID = bson.NewObjectId()
+	c.When = time.Now()
 
-	// // insert it into the database
-	// if err := db.DB("commentsapp").C("comments").Insert(&c); err != nil {
-	// 	http.Error(w, err.Error(), http.StatusBadRequest)
-	// 	return
-	// }
+	// insert it into the database
+	if err := db.DB("commentsapp").C("comments").Insert(&c); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	fmt.Fprintln(w, "Hello:")
 }

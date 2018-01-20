@@ -21,7 +21,7 @@ func sendJSONResponse(w http.ResponseWriter, statusCode int, data interface{}) {
 	}
 }
 
-func AttachRouter(h *mux.Router) *mux.Router {
+func InitRoutes(h *mux.Router) *mux.Router {
 	apiRouter := mux.NewRouter().PathPrefix("/api/v1").Subrouter().StrictSlash(true)
 	for _, route := range apiRoutes {
 		apiRouter.Methods(route.Method...).Path(route.Pattern).Name(route.Name).Handler(route.HandlerFunc)
