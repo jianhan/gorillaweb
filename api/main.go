@@ -6,9 +6,9 @@ import (
 
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
-	"github.com/jianhan/gorillaweb/src/bootstrap"
-	"github.com/jianhan/gorillaweb/src/db"
-	gHandlers "github.com/jianhan/gorillaweb/src/handlers"
+	"github.com/jianhan/gorillaweb/api/bootstrap"
+	"github.com/jianhan/gorillaweb/api/db"
+	gHandlers "github.com/jianhan/gorillaweb/api/handlers"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/urfave/negroni"

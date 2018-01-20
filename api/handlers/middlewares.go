@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/jianhan/gorillaweb/src/auth"
+	"github.com/jianhan/gorillaweb/api/auth"
 	"github.com/urfave/negroni"
 	mgo "gopkg.in/mgo.v2"
 )
